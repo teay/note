@@ -26,6 +26,7 @@ export default function App() {
     const saved = localStorage.getItem('darkMode');
     return saved ? JSON.parse(saved) : false;
   });
+  const [loginError, setLoginError] = useState(null);
 
   useEffect(() => {
     localStorage.setItem('darkMode', JSON.stringify(darkMode));
@@ -35,6 +36,21 @@ export default function App() {
       document.documentElement.classList.remove('dark');
     }
   }, [darkMode]);
+
+  const handleLogin = async () => {
+    setLoginError(null);
+    try {
+      await signInWithPopup(auth, googleProvider);
+    } catch (error) {
+      if (error.code === 'auth/popup-blocked') {
+        setLoginError('Popup blocked by browser. Please allow popups for this site and try again.');
+      } else if (error.code === 'auth/popup-closed-by-user') {
+        setLoginError('Login cancelled. Please try again.');
+      } else {
+        setLoginError('Login failed. Please try again later.');
+      }
+    }
+  };
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -119,6 +135,24 @@ export default function App() {
     }
   };
 
+  const handleShareNote = async (note) => {
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = note.content;
+    const text = (tempDiv.innerText || '').trim();
+    const title = text.split('\n')[0]?.trim() || 'Untitled Note';
+    const body = text.length > 500 ? text.substring(0, 500) + '...' : text;
+
+    if (navigator.share) {
+      try {
+        await navigator.share({ title, text: body });
+      } catch (err) {
+        if (err.name !== 'AbortError') console.error('Share failed:', err);
+      }
+    } else {
+      await navigator.clipboard.writeText(body);
+    }
+  };
+
   if (loading) {
     return (
       <div className="h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
@@ -138,7 +172,7 @@ export default function App() {
           <h1 className="text-3xl font-bold text-slate-800 dark:text-slate-100 mb-2 tracking-tight">note</h1>
           <p className="text-slate-500 dark:text-slate-400 mb-8 text-sm">Capture your thoughts, anywhere.</p>
           <button 
-            onClick={() => signInWithPopup(auth, googleProvider)}
+            onClick={handleLogin}
             className="flex items-center gap-3 px-6 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-full font-medium text-slate-700 dark:text-slate-200 hover:border-slate-300 dark:hover:border-slate-600 hover:shadow-lg hover:shadow-slate-200/50 dark:hover:shadow-slate-900/50 transition-all duration-200"
           >
             <svg className="w-5 h-5" viewBox="0 0 24 24">
@@ -149,6 +183,9 @@ export default function App() {
             </svg>
             Sign in with Google
           </button>
+          {loginError && (
+            <p className="mt-4 text-sm text-red-500 dark:text-red-400 animate-fade-in">{loginError}</p>
+          )}
         </div>
       </div>
     );
@@ -160,7 +197,7 @@ export default function App() {
     <div className="flex flex-col h-screen bg-white dark:bg-slate-900 overflow-hidden">
       <Navbar 
         user={user}
-        onLogin={() => signInWithPopup(auth, googleProvider)}
+        onLogin={handleLogin}
         onLogout={() => signOut(auth)}
         onNewNote={handleCreateNote}
         onDeleteNote={() => handleDeleteNote(activeNoteId)}
@@ -174,6 +211,8 @@ export default function App() {
           notes={notes} 
           activeNoteId={activeNoteId} 
           onSelectNote={setActiveNoteId} 
+          onDeleteNote={handleDeleteNote}
+          onShareNote={handleShareNote}
           isOpen={sidebarOpen}
         />
         <main className="flex-1 h-full overflow-y-auto bg-slate-50/50 dark:bg-slate-800/50">
