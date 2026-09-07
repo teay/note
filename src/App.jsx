@@ -25,7 +25,8 @@ export default function App() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [darkMode, setDarkMode] = useState(() => {
     const saved = localStorage.getItem('darkMode');
-    return saved ? JSON.parse(saved) : false;
+    if (saved !== null) return JSON.parse(saved);
+    return window.matchMedia('(prefers-color-scheme: dark)').matches;
   });
   const [loginError, setLoginError] = useState(null);
 
@@ -37,6 +38,17 @@ export default function App() {
       document.documentElement.classList.remove('dark');
     }
   }, [darkMode]);
+
+  useEffect(() => {
+    const mq = window.matchMedia('(prefers-color-scheme: dark)');
+    const handler = (e) => {
+      if (localStorage.getItem('darkMode') === null) {
+        setDarkMode(e.matches);
+      }
+    };
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
+  }, []);
 
   const handleLogin = async () => {
     setLoginError(null);
