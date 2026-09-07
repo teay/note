@@ -135,24 +135,6 @@ export default function App() {
     }
   };
 
-  const handleShareNote = async (note) => {
-    const tempDiv = document.createElement('div');
-    tempDiv.innerHTML = note.content;
-    const text = (tempDiv.innerText || '').trim();
-    const title = text.split('\n')[0]?.trim() || 'Untitled Note';
-    const body = text.length > 500 ? text.substring(0, 500) + '...' : text;
-
-    if (navigator.share) {
-      try {
-        await navigator.share({ title, text: body });
-      } catch (err) {
-        if (err.name !== 'AbortError') console.error('Share failed:', err);
-      }
-    } else {
-      await navigator.clipboard.writeText(body);
-    }
-  };
-
   if (loading) {
     return (
       <div className="h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
@@ -211,8 +193,6 @@ export default function App() {
           notes={notes} 
           activeNoteId={activeNoteId} 
           onSelectNote={setActiveNoteId} 
-          onDeleteNote={handleDeleteNote}
-          onShareNote={handleShareNote}
           isOpen={sidebarOpen}
         />
         <main className="flex-1 h-full overflow-y-auto bg-slate-50/50 dark:bg-slate-800/50">
