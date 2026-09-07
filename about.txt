@@ -1,6 +1,0 @@
-This favicon was generated using the following font:
-
-- Font Title: Amethysta
-- Font Author: undefined
-- Font Source: https://fonts.gstatic.com/s/amethysta/v17/rP2Fp2K15kgb_F3ibfWIGDWCBl0O8Q.ttf
-- Font License: undefined)
