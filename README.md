@@ -1,4 +1,3 @@
-cat << 'EOF' > README.md
 # 📝 Apple Notes Clone (PWA + Firebase)
 
 An independent, cloud-synced, web-based Apple Notes clone built as a Progressive Web App (PWA) for iPhone and Desktop. Powered by React, Vite, Tailwind CSS, Tiptap, and Firebase Firestore.
