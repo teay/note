@@ -12,6 +12,7 @@ import {
 } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
 import { db, auth, googleProvider, signInWithPopup, signOut } from './firebase';
+import { sanitizeForStorage } from '../text-sanitizer.mjs';
 import Sidebar from './components/Sidebar';
 import Editor from './components/Editor';
 import Navbar from './components/Navbar';
@@ -113,9 +114,10 @@ export default function App() {
   const handleUpdateNote = async (updatedContent, title) => {
     if (!activeNoteId) return;
     try {
+      const safeContent = sanitizeForStorage(updatedContent);
       const noteRef = doc(db, 'notes', activeNoteId);
       await updateDoc(noteRef, {
-        content: updatedContent,
+        content: safeContent,
         title: title || 'Untitled Note',
         updatedAt: serverTimestamp()
       });
