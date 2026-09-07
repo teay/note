@@ -24,14 +24,13 @@ export default function App() {
   const [activeNoteId, setActiveNoteId] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [darkMode, setDarkMode] = useState(() => {
-    const saved = localStorage.getItem('darkMode');
-    if (saved !== null) return JSON.parse(saved);
+    const manual = localStorage.getItem('darkModeManual');
+    if (manual !== null) return JSON.parse(manual);
     return window.matchMedia('(prefers-color-scheme: dark)').matches;
   });
   const [loginError, setLoginError] = useState(null);
 
   useEffect(() => {
-    localStorage.setItem('darkMode', JSON.stringify(darkMode));
     if (darkMode) {
       document.documentElement.classList.add('dark');
     } else {
@@ -273,7 +272,10 @@ export default function App() {
         activeNoteId={activeNoteId}
         toggleSidebar={() => setSidebarOpen(!sidebarOpen)}
         darkMode={darkMode}
-        setDarkMode={setDarkMode}
+        setDarkMode={(val) => {
+          setDarkMode(val);
+          localStorage.setItem('darkModeManual', JSON.stringify(val));
+        }}
         onCopyText={handleCopyNoteText}
         onCopyHtml={handleCopyNoteHtml}
         onCopyMarkdown={handleCopyNoteMarkdown}
