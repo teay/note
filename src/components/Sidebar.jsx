@@ -197,7 +197,7 @@ export default function Sidebar({ notes, activeNoteId, onSelectNote, onDeleteNot
               <div
                 key={note.id}
                 ref={(el) => { itemsRef.current[note.id] = el; }}
-                className="relative mb-1"
+                className="relative mb-1 overflow-hidden"
               >
                 <div className="absolute top-0 bottom-0 right-0 flex z-0 pointer-events-none">
                   <button
