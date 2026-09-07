@@ -22,6 +22,8 @@ pnpm-debug.log*
 .firebase
 .vite
 .cache
+serviceAccountKey.json
+backup-notes-*.json
 
 # Editor / System files
 .vscode/*

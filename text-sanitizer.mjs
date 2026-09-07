@@ -1,25 +1,64 @@
 /**
  * Text Sanitizer & RTSP URL Handler
- * - Sanitizes HTML/XSS from user input
+ * - Sanitizes HTML using allowlist (preserves safe tags)
  * - Handles RTSP URLs safely (plain text display)
  * - Masks passwords in RTSP credential URLs
  */
 
-// ==================== Core Sanitization ====================
+import sanitize from 'sanitize-html';
 
-const HTML_ENTITY_MAP = {
-  '&': '&amp;',
-  '<': '&lt;',
-  '>': '&gt;',
-  '"': '&quot;',
-  "'": '&#x27;',
-  '/': '&#x2F;',
-  '`': '&#96;',
+// ==================== HTML Allowlist Config ====================
+
+const SAFE_TAGS = [
+  'p', 'br', 'hr',
+  'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+  'strong', 'em', 'u', 's', 'del', 'ins', 'mark',
+  'code', 'pre', 'blockquote',
+  'ul', 'ol', 'li',
+  'a', 'img', 'span', 'div',
+  'table', 'thead', 'tbody', 'tr', 'th', 'td',
+  'sub', 'sup',
+  'details', 'summary',
+];
+
+const SAFE_ATTRS = {
+  a: ['href', 'title', 'target', 'rel'],
+  img: ['src', 'alt', 'title', 'width', 'height'],
+  span: ['class'],
+  td: ['colspan', 'rowspan'],
+  th: ['colspan', 'rowspan'],
+  code: ['class'],
 };
+
+const SAFE_URL_SCHEMES = ['http', 'https', 'mailto'];
+
+const sanitizeHtmlConfig = {
+  allowedTags: SAFE_TAGS,
+  allowedAttributes: SAFE_ATTRS,
+  allowedSchemes: SAFE_URL_SCHEMES,
+  allowedSchemesByTag: {},
+  disallowedTagsMode: 'discard',
+};
+
+function sanitizeHtmlContent(input) {
+  if (typeof input !== 'string') return '';
+  return sanitize(input, sanitizeHtmlConfig);
+}
+
+// ==================== Core Sanitization ====================
 
 function escapeHtml(str) {
   if (typeof str !== 'string') return '';
-  return str.replace(/[&<>"'\/`]/g, (char) => HTML_ENTITY_MAP[char]);
+  const map = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#x27;',
+    '/': '&#x2F;',
+    '`': '&#96;',
+  };
+  return str.replace(/[&<>"'\/`]/g, (char) => map[char]);
 }
 
 // ==================== RTSP URL Handling ====================
@@ -66,13 +105,12 @@ function sanitizeText(input) {
     return placeholder;
   });
 
-  let result = escapeHtml(withPlaceholders);
+  let result = sanitizeHtmlContent(withPlaceholders);
 
   for (const { original, placeholder } of rtspUrls) {
-    const escapedPlaceholder = escapeHtml(placeholder);
     const encodedUrl = processRtspUrl(original);
     const tag = `<code class="rtsp-url" data-original="${escapeHtml(original)}">${encodedUrl}</code>`;
-    result = result.replace(escapedPlaceholder, tag);
+    result = result.replace(placeholder, tag);
   }
 
   return result;
@@ -90,12 +128,11 @@ function sanitizeForStorage(input) {
     return placeholder;
   });
 
-  let result = escapeHtml(withPlaceholders);
+  let result = sanitizeHtmlContent(withPlaceholders);
 
   for (const { original, placeholder } of rtspUrls) {
-    const escapedPlaceholder = escapeHtml(placeholder);
     const masked = maskRtspPassword(original);
-    result = result.replace(escapedPlaceholder, masked);
+    result = result.replace(placeholder, masked);
   }
 
   return result;
@@ -124,5 +161,6 @@ export {
   processRtspUrl,
   sanitizeText,
   sanitizeForStorage,
+  sanitizeHtmlContent,
   extractRtspUrls,
 };
