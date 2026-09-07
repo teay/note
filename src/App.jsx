@@ -142,7 +142,14 @@ export default function App() {
     if (note) {
       const tmp = document.createElement('div');
       tmp.innerHTML = note.content || '';
-      navigator.clipboard.writeText(tmp.textContent || tmp.innerText || '');
+      tmp.querySelectorAll('p, li, h1, h2, h3, h4, h5, h6, br, tr').forEach(el => {
+        if (el.tagName === 'BR') {
+          el.insertAdjacentText('afterend', '\n');
+        } else {
+          el.insertAdjacentText('beforeend', '\n');
+        }
+      });
+      navigator.clipboard.writeText(tmp.textContent || '');
     }
   };
 
