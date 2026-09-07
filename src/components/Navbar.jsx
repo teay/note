@@ -1,7 +1,17 @@
 import React from 'react';
-import { SquarePen, Trash2, LogIn, LogOut, PanelLeft, Sun, Moon } from 'lucide-react';
+import { SquarePen, Trash2, LogIn, LogOut, PanelLeft, Sun, Moon, Copy, Check } from 'lucide-react';
 
-export default function Navbar({ user, onLogin, onLogout, onNewNote, onDeleteNote, activeNoteId, toggleSidebar, darkMode, setDarkMode }) {
+export default function Navbar({ user, onLogin, onLogout, onNewNote, onDeleteNote, activeNoteId, toggleSidebar, darkMode, setDarkMode, onCopy }) {
+  const [copied, setCopied] = React.useState(false);
+
+  const handleCopy = () => {
+    if (onCopy) {
+      onCopy();
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
   return (
     <div className="h-14 bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border-b border-slate-200/80 dark:border-slate-700/80 flex items-center justify-between px-4 sticky top-0 z-50">
       <div className="flex items-center gap-2">
@@ -21,12 +31,21 @@ export default function Navbar({ user, onLogin, onLogout, onNewNote, onDeleteNot
         {user ? (
           <>
             {activeNoteId && (
-              <button 
-                onClick={onDeleteNote} 
-                className="p-2 text-slate-400 dark:text-slate-500 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-all duration-150 hover:scale-105 active:scale-95"
-              >
-                <Trash2 size={18} />
-              </button>
+              <>
+                <button 
+                  onClick={handleCopy}
+                  className="p-2 text-slate-400 dark:text-slate-500 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-xl transition-all duration-150 hover:scale-105 active:scale-95"
+                  title="Copy content"
+                >
+                  {copied ? <Check size={18} /> : <Copy size={18} />}
+                </button>
+                <button 
+                  onClick={onDeleteNote} 
+                  className="p-2 text-slate-400 dark:text-slate-500 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-all duration-150 hover:scale-105 active:scale-95"
+                >
+                  <Trash2 size={18} />
+                </button>
+              </>
             )}
             <button 
               onClick={onNewNote} 

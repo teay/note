@@ -137,6 +137,13 @@ export default function App() {
     }
   };
 
+  const handleCopyNote = () => {
+    const note = notes.find(n => n.id === activeNoteId);
+    if (note) {
+      navigator.clipboard.writeText(note.content || '');
+    }
+  };
+
   if (loading) {
     return (
       <div className="h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
@@ -189,6 +196,7 @@ export default function App() {
         toggleSidebar={() => setSidebarOpen(!sidebarOpen)}
         darkMode={darkMode}
         setDarkMode={setDarkMode}
+        onCopy={handleCopyNote}
       />
       <div className="flex flex-1 overflow-hidden">
         <Sidebar 
