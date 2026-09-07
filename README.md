@@ -12,6 +12,7 @@ An independent, cloud-synced, web-based Apple Notes clone built as a Progressive
 - **PWA Ready:** Supports "Add to Home Screen" on iOS Safari with native standalone app layout.
 - **Minimalist UI:** Styled with Tailwind CSS inspired by Apple's minimalist design aesthetics.
 - **XSS Protection:** HTML sanitization using `sanitize-html` with allowlist approach.
+- **Copy Modes:** Copy notes as Plain Text, HTML (with formatting), or Markdown.
 
 ---
 
