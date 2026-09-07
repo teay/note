@@ -140,7 +140,9 @@ export default function App() {
   const handleCopyNote = () => {
     const note = notes.find(n => n.id === activeNoteId);
     if (note) {
-      navigator.clipboard.writeText(note.content || '');
+      const tmp = document.createElement('div');
+      tmp.innerHTML = note.content || '';
+      navigator.clipboard.writeText(tmp.textContent || tmp.innerText || '');
     }
   };
 
