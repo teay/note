@@ -137,7 +137,7 @@ export default function App() {
     }
   };
 
-  const handleCopyNote = () => {
+  const handleCopyNoteText = () => {
     const note = notes.find(n => n.id === activeNoteId);
     if (note) {
       const tmp = document.createElement('div');
@@ -150,6 +150,53 @@ export default function App() {
         }
       });
       navigator.clipboard.writeText(tmp.textContent || '');
+    }
+  };
+
+  const handleCopyNoteHtml = () => {
+    const note = notes.find(n => n.id === activeNoteId);
+    if (note) {
+      const html = note.content || '';
+      const plain = document.createElement('div');
+      plain.innerHTML = html;
+      const text = plain.textContent || '';
+      const htmlBlob = new Blob([html], { type: 'text/html' });
+      const textBlob = new Blob([text], { type: 'text/plain' });
+      navigator.clipboard.write([
+        new ClipboardItem({ 'text/html': htmlBlob, 'text/plain': textBlob })
+      ]);
+    }
+  };
+
+  const handleCopyNoteMarkdown = () => {
+    const note = notes.find(n => n.id === activeNoteId);
+    if (note) {
+      const tmp = document.createElement('div');
+      tmp.innerHTML = note.content || '';
+      let md = tmp.innerHTML
+        .replace(/<h1[^>]*>(.*?)<\/h1>/gi, '# $1\n\n')
+        .replace(/<h2[^>]*>(.*?)<\/h2>/gi, '## $1\n\n')
+        .replace(/<h3[^>]*>(.*?)<\/h3>/gi, '### $1\n\n')
+        .replace(/<h4[^>]*>(.*?)<\/h4>/gi, '#### $1\n\n')
+        .replace(/<h5[^>]*>(.*?)<\/h5>/gi, '##### $1\n\n')
+        .replace(/<h6[^>]*>(.*?)<\/h6>/gi, '###### $1\n\n')
+        .replace(/<strong[^>]*>(.*?)<\/strong>/gi, '**$1**')
+        .replace(/<b[^>]*>(.*?)<\/b>/gi, '**$1**')
+        .replace(/<em[^>]*>(.*?)<\/em>/gi, '*$1*')
+        .replace(/<i[^>]*>(.*?)<\/i>/gi, '*$1*')
+        .replace(/<code[^>]*>(.*?)<\/code>/gi, '`$1`')
+        .replace(/<li[^>]*>(.*?)<\/li>/gi, '- $1\n')
+        .replace(/<blockquote[^>]*>(.*?)<\/blockquote>/gi, '> $1\n\n')
+        .replace(/<br\s*\/?>/gi, '\n')
+        .replace(/<p[^>]*>(.*?)<\/p>/gi, '$1\n\n')
+        .replace(/<[^>]+>/g, '')
+        .replace(/&amp;/g, '&')
+        .replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>')
+        .replace(/&nbsp;/g, ' ')
+        .replace(/\n{3,}/g, '\n\n')
+        .trim();
+      navigator.clipboard.writeText(md);
     }
   };
 
@@ -205,7 +252,9 @@ export default function App() {
         toggleSidebar={() => setSidebarOpen(!sidebarOpen)}
         darkMode={darkMode}
         setDarkMode={setDarkMode}
-        onCopy={handleCopyNote}
+        onCopyText={handleCopyNoteText}
+        onCopyHtml={handleCopyNoteHtml}
+        onCopyMarkdown={handleCopyNoteMarkdown}
       />
       <div className="flex flex-1 overflow-hidden">
         <Sidebar 

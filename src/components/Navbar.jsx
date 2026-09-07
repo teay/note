@@ -1,14 +1,14 @@
 import React from 'react';
-import { SquarePen, Trash2, LogIn, LogOut, PanelLeft, Sun, Moon, Copy, Check } from 'lucide-react';
+import { SquarePen, Trash2, LogIn, LogOut, PanelLeft, Sun, Moon, Copy, Check, FileText, Code, Type } from 'lucide-react';
 
-export default function Navbar({ user, onLogin, onLogout, onNewNote, onDeleteNote, activeNoteId, toggleSidebar, darkMode, setDarkMode, onCopy }) {
-  const [copied, setCopied] = React.useState(false);
+export default function Navbar({ user, onLogin, onLogout, onNewNote, onDeleteNote, activeNoteId, toggleSidebar, darkMode, setDarkMode, onCopyText, onCopyHtml, onCopyMarkdown }) {
+  const [copiedType, setCopiedType] = React.useState(null);
 
-  const handleCopy = () => {
-    if (onCopy) {
-      onCopy();
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+  const handleCopy = (type, handler) => {
+    if (handler) {
+      handler();
+      setCopiedType(type);
+      setTimeout(() => setCopiedType(null), 2000);
     }
   };
 
@@ -33,11 +33,25 @@ export default function Navbar({ user, onLogin, onLogout, onNewNote, onDeleteNot
             {activeNoteId && (
               <>
                 <button 
-                  onClick={handleCopy}
+                  onClick={() => handleCopy('text', onCopyText)}
                   className="p-2 text-slate-400 dark:text-slate-500 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-xl transition-all duration-150 hover:scale-105 active:scale-95"
-                  title="Copy content"
+                  title="Copy Text"
                 >
-                  {copied ? <Check size={18} /> : <Copy size={18} />}
+                  {copiedType === 'text' ? <Check size={18} /> : <Type size={18} />}
+                </button>
+                <button 
+                  onClick={() => handleCopy('html', onCopyHtml)}
+                  className="p-2 text-slate-400 dark:text-slate-500 hover:text-green-500 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-xl transition-all duration-150 hover:scale-105 active:scale-95"
+                  title="Copy with Formatting"
+                >
+                  {copiedType === 'html' ? <Check size={18} /> : <FileText size={18} />}
+                </button>
+                <button 
+                  onClick={() => handleCopy('md', onCopyMarkdown)}
+                  className="p-2 text-slate-400 dark:text-slate-500 hover:text-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/20 rounded-xl transition-all duration-150 hover:scale-105 active:scale-95"
+                  title="Copy as Markdown"
+                >
+                  {copiedType === 'md' ? <Check size={18} /> : <Code size={18} />}
                 </button>
                 <button 
                   onClick={onDeleteNote} 
