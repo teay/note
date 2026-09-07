@@ -23,7 +23,6 @@ pnpm-debug.log*
 .vite
 .cache
 serviceAccountKey.json
-backup-notes-*.json
 
 # Editor / System files
 .vscode/*
