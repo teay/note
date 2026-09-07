@@ -134,11 +134,7 @@ export default function App() {
     return (
       <div className="h-screen flex flex-col items-center justify-center bg-gradient-to-br from-slate-50 via-white to-amber-50/30 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800 px-6">
         <div className="text-center animate-fade-in">
-          <div className="w-20 h-20 bg-gradient-to-br from-iosYellow to-amber-600 rounded-3xl flex items-center justify-center shadow-lg shadow-amber-200/50 mx-auto mb-6">
-            <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-            </svg>
-          </div>
+          <img src="./logo.png" alt="Notes Logo" className="w-20 h-20 rounded-3xl shadow-xl shadow-amber-500/20 mx-auto mb-6 object-cover" />
           <h1 className="text-3xl font-bold text-slate-800 dark:text-slate-100 mb-2 tracking-tight">Notes</h1>
           <p className="text-slate-500 dark:text-slate-400 mb-8 text-sm">Capture your thoughts, anywhere.</p>
           <button 
