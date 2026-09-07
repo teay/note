@@ -12,8 +12,8 @@ export default function Navbar({ user, onLogin, onLogout, onNewNote, onDeleteNot
           <PanelLeft size={20} />
         </button>
         <div className="hidden md:flex items-center gap-2 ml-2">
-          <img src="./logo.png" alt="Notes Logo" className="w-7 h-7 rounded-lg shadow-sm object-cover" />
-          <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">Notes</span>
+          <img src="./logo.png" alt="note Logo" className="w-7 h-7 rounded-lg shadow-sm object-cover" />
+          <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">note</span>
         </div>
       </div>
 

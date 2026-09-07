@@ -10,9 +10,9 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico'],
       manifest: {
-        name: 'Notes Firebase',
-        short_name: 'Notes',
-        description: 'Apple Notes Clone Web App with Firebase',
+        name: 'note',
+        short_name: 'note',
+        description: 'note Web App with Firebase',
         theme_color: '#fdfbf7',
         background_color: '#fdfbf7',
         display: 'standalone',

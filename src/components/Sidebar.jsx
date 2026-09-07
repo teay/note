@@ -39,7 +39,7 @@ export default function Sidebar({ notes, activeNoteId, onSelectNote, isOpen }) {
     <div className="w-full md:w-80 bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl border-r border-slate-200/80 dark:border-slate-700/80 flex flex-col h-[calc(100vh-3.5rem)]">
       <div className="p-4 border-b border-slate-100 dark:border-slate-700/50">
         <div className="flex items-center justify-between mb-3">
-          <h1 className="text-lg font-bold px-1 text-slate-800 dark:text-slate-100 tracking-tight">My Notes</h1>
+          <h1 className="text-lg font-bold px-1 text-slate-800 dark:text-slate-100 tracking-tight">my note</h1>
           <span className="text-xs text-slate-400 dark:text-slate-500 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-full">
             {filteredNotes.length}
           </span>

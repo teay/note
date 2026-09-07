@@ -134,8 +134,8 @@ export default function App() {
     return (
       <div className="h-screen flex flex-col items-center justify-center bg-gradient-to-br from-slate-50 via-white to-amber-50/30 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800 px-6">
         <div className="text-center animate-fade-in">
-          <img src="./logo.png" alt="Notes Logo" className="w-20 h-20 rounded-3xl shadow-xl shadow-amber-500/20 mx-auto mb-6 object-cover" />
-          <h1 className="text-3xl font-bold text-slate-800 dark:text-slate-100 mb-2 tracking-tight">Notes</h1>
+          <img src="./logo.png" alt="note Logo" className="w-20 h-20 rounded-3xl shadow-xl shadow-amber-500/20 mx-auto mb-6 object-cover" />
+          <h1 className="text-3xl font-bold text-slate-800 dark:text-slate-100 mb-2 tracking-tight">note</h1>
           <p className="text-slate-500 dark:text-slate-400 mb-8 text-sm">Capture your thoughts, anywhere.</p>
           <button 
             onClick={() => signInWithPopup(auth, googleProvider)}
