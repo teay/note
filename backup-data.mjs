@@ -3,9 +3,19 @@
  * อ่านข้อมูลทั้งหมดแล้วบันทึกเป็นไฟล์ JSON
  */
 
-import { initializeApp, cert } from 'firebase-admin/app';
-import { getFirestore } from 'firebase-admin/firestore';
 import { readFileSync, writeFileSync } from 'fs';
+
+const envContent = readFileSync('./.env', 'utf8');
+for (const line of envContent.split('\n')) {
+  const trimmed = line.trim();
+  if (trimmed && !trimmed.startsWith('#')) {
+    const [key, ...valueParts] = trimmed.split('=');
+    process.env[key.trim()] = valueParts.join('=').trim();
+  }
+}
+
+const { initializeApp, cert } = await import('firebase-admin/app');
+const { getFirestore } = await import('firebase-admin/firestore');
 
 const COLLECTION_NAME = 'notes';
 const BATCH_SIZE = 100;

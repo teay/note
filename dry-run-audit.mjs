@@ -4,10 +4,20 @@
  * ห้ามแก้ไขข้อมูลจริงเด็ดขาด
  */
 
-import { initializeApp, cert } from 'firebase-admin/app';
-import { getFirestore } from 'firebase-admin/firestore';
 import { readFileSync } from 'fs';
-import { sanitizeForStorage, maskRtspPassword } from './text-sanitizer.mjs';
+
+const envContent = readFileSync('./.env', 'utf8');
+for (const line of envContent.split('\n')) {
+  const trimmed = line.trim();
+  if (trimmed && !trimmed.startsWith('#')) {
+    const [key, ...valueParts] = trimmed.split('=');
+    process.env[key.trim()] = valueParts.join('=').trim();
+  }
+}
+
+const { initializeApp, cert } = await import('firebase-admin/app');
+const { getFirestore } = await import('firebase-admin/firestore');
+const { sanitizeForStorage, maskRtspPassword } = await import('./text-sanitizer.mjs');
 
 // ==================== CONFIG ====================
 const COLLECTION_NAME = 'notes';

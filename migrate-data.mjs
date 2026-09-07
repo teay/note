@@ -3,11 +3,21 @@
  * ⚠️ เขียนทับข้อมูลจริง - สำรองข้อมูลก่อนรันทุกครั้ง!
  */
 
-import { initializeApp, cert } from 'firebase-admin/app';
-import { getFirestore } from 'firebase-admin/firestore';
 import { readFileSync } from 'fs';
-import { createInterface } from 'readline';
-import { sanitizeForStorage } from './text-sanitizer.mjs';
+
+const envContent = readFileSync('./.env', 'utf8');
+for (const line of envContent.split('\n')) {
+  const trimmed = line.trim();
+  if (trimmed && !trimmed.startsWith('#')) {
+    const [key, ...valueParts] = trimmed.split('=');
+    process.env[key.trim()] = valueParts.join('=').trim();
+  }
+}
+
+const { initializeApp, cert } = await import('firebase-admin/app');
+const { getFirestore } = await import('firebase-admin/firestore');
+const { createInterface } = await import('readline');
+const { sanitizeForStorage } = await import('./text-sanitizer.mjs');
 
 // ==================== CONFIG ====================
 const COLLECTION_NAME = 'notes';

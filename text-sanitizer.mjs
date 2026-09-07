@@ -1,11 +1,12 @@
 /**
  * Text Sanitizer & RTSP URL Handler
  * - Sanitizes HTML using allowlist (preserves safe tags)
- * - Handles RTSP URLs safely (plain text display)
- * - Masks passwords in RTSP credential URLs
+ * - Encrypts RTSP URLs before storage
+ * - Decrypts and masks passwords for display
  */
 
 import sanitize from 'sanitize-html';
+import { encrypt, decrypt, isEncrypted } from './encrypt.mjs';
 
 // ==================== HTML Allowlist Config ====================
 
@@ -64,6 +65,12 @@ function escapeHtml(str) {
 // ==================== RTSP URL Handling ====================
 
 const RTSP_URL_REGEX = /rtsp:\/\/[^\s<>"'`]+/gi;
+const RTSP_CREDENTIAL_REGEX = /^rtsp:\/\/([^:]+):([^@]+)@(.+)$/i;
+const ENCRYPTED_REGEX = /ENC:[A-Za-z0-9+/=]+/g;
+
+function hasPassword(url) {
+  return RTSP_CREDENTIAL_REGEX.test(url);
+}
 
 function maskRtspPassword(url) {
   const prefix = 'rtsp://';
@@ -86,30 +93,45 @@ function maskRtspPassword(url) {
   return `${prefix}${username}:****@${hostPortPath}`;
 }
 
-function processRtspUrl(rawUrl) {
-  const masked = maskRtspPassword(rawUrl);
-  return escapeHtml(masked);
-}
-
 // ==================== Main Processing ====================
 
 function sanitizeText(input) {
   if (typeof input !== 'string') return '';
 
-  const rtspUrls = [];
-  let placeholderIndex = 0;
+  const tokens = [];
+  let tokenIndex = 0;
 
-  const withPlaceholders = input.replace(RTSP_URL_REGEX, (match) => {
-    const placeholder = `__RTSP_PLACEHOLDER_${placeholderIndex++}__`;
-    rtspUrls.push({ original: match, placeholder });
+  const withPlaceholders = input.replace(ENCRYPTED_REGEX, (match) => {
+    const placeholder = `__RTSP_${tokenIndex++}__`;
+    tokens.push({ raw: match, placeholder });
+    return placeholder;
+  }).replace(RTSP_URL_REGEX, (match) => {
+    const placeholder = `__RTSP_${tokenIndex++}__`;
+    tokens.push({ raw: match, placeholder });
     return placeholder;
   });
 
   let result = sanitizeHtmlContent(withPlaceholders);
 
-  for (const { original, placeholder } of rtspUrls) {
-    const encodedUrl = processRtspUrl(original);
-    const tag = `<code class="rtsp-url" data-original="${escapeHtml(original)}">${encodedUrl}</code>`;
+  for (const { raw, placeholder } of tokens) {
+    let displayUrl;
+
+    if (isEncrypted(raw)) {
+      try {
+        const decrypted = decrypt(raw);
+        displayUrl = maskRtspPassword(decrypted);
+      } catch {
+        displayUrl = '[encrypted]';
+      }
+    } else if (hasPassword(raw)) {
+      displayUrl = maskRtspPassword(raw);
+    } else {
+      displayUrl = raw;
+    }
+
+    const encodedUrl = escapeHtml(displayUrl);
+    const originalAttr = escapeHtml(isEncrypted(raw) ? '' : raw);
+    const tag = `<code class="rtsp-url"${originalAttr ? ` data-original="${originalAttr}"` : ''}>${encodedUrl}</code>`;
     result = result.replace(placeholder, tag);
   }
 
@@ -119,20 +141,25 @@ function sanitizeText(input) {
 function sanitizeForStorage(input) {
   if (typeof input !== 'string') return '';
 
-  const rtspUrls = [];
-  let placeholderIndex = 0;
+  const tokens = [];
+  let tokenIndex = 0;
 
   const withPlaceholders = input.replace(RTSP_URL_REGEX, (match) => {
-    const placeholder = `__RTSP_PLACEHOLDER_${placeholderIndex++}__`;
-    rtspUrls.push({ original: match, placeholder });
+    const placeholder = `__RTSP_${tokenIndex++}__`;
+    tokens.push({ raw: match, placeholder });
     return placeholder;
   });
 
   let result = sanitizeHtmlContent(withPlaceholders);
 
-  for (const { original, placeholder } of rtspUrls) {
-    const masked = maskRtspPassword(original);
-    result = result.replace(placeholder, masked);
+  for (const { raw, placeholder } of tokens) {
+    if (isEncrypted(raw)) {
+      result = result.replace(placeholder, raw);
+    } else if (hasPassword(raw)) {
+      result = result.replace(placeholder, encrypt(raw));
+    } else {
+      result = result.replace(placeholder, raw);
+    }
   }
 
   return result;
@@ -142,13 +169,36 @@ function extractRtspUrls(text) {
   if (typeof text !== 'string') return [];
 
   const urls = [];
+
+  const encryptedRegex = /ENC:[A-Za-z0-9+/=]+/g;
   let match;
 
-  const regex = /rtsp:\/\/[^\s<>"'`]+/gi;
-  while ((match = regex.exec(text)) !== null) {
+  while ((match = encryptedRegex.exec(text)) !== null) {
+    const raw = match[0];
+    let decrypted = raw;
+
+    if (isEncrypted(raw)) {
+      try {
+        decrypted = decrypt(raw);
+      } catch {
+        decrypted = '[encrypted]';
+      }
+    }
+
     urls.push({
-      original: match[0],
-      masked: maskRtspPassword(match[0]),
+      original: raw,
+      decrypted,
+      masked: maskRtspPassword(decrypted),
+    });
+  }
+
+  const plainRegex = /rtsp:\/\/[^\s<>"'`]+/gi;
+  while ((match = plainRegex.exec(text)) !== null) {
+    const raw = match[0];
+    urls.push({
+      original: raw,
+      decrypted: raw,
+      masked: maskRtspPassword(raw),
     });
   }
 
@@ -158,7 +208,7 @@ function extractRtspUrls(text) {
 export {
   escapeHtml,
   maskRtspPassword,
-  processRtspUrl,
+  hasPassword,
   sanitizeText,
   sanitizeForStorage,
   sanitizeHtmlContent,
