@@ -11,6 +11,7 @@ An independent, cloud-synced, web-based Apple Notes clone built as a Progressive
 - **Rich Text Editing:** Built with Tiptap editor supporting Bold, Italic, Headings (H1/H2), Bullet Lists, and Blockquotes.
 - **PWA Ready:** Supports "Add to Home Screen" on iOS Safari with native standalone app layout.
 - **Minimalist UI:** Styled with Tailwind CSS inspired by Apple's minimalist design aesthetics.
+- **Dark Mode:** Auto-detects system preference (Windows, iOS, Android, Linux) with manual toggle override.
 - **XSS Protection:** HTML sanitization using `sanitize-html` with allowlist approach.
 - **Copy Modes:** Copy notes as Plain Text, HTML (with formatting), or Markdown.
 
