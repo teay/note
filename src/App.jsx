@@ -252,7 +252,7 @@ export default function App() {
             Sign in with Google
           </button>
           {loginError && (
-            <p className="mt-4 text-sm text-red-500 dark:text-red-400 animate-fade-in">{loginError}</p>
+            <p className="mt-6 text-sm text-red-400 animate-fade-in">{loginError}</p>
           )}
         </div>
       </div>
