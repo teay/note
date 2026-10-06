@@ -1,14 +1,13 @@
 import React, { useState, useMemo } from 'react';
 import { Search } from 'lucide-react';
 
-function getPreviewText(content) {
+function getPlainText(content) {
   if (!content) return '';
   const tempDiv = document.createElement('div');
   tempDiv.innerHTML = content;
   let text = tempDiv.innerText || '';
   text = text.replace(/^#+\s*/gm, '').replace(/\*\*/g, '').replace(/\*/g, '').replace(/`/g, '');
-  text = text.replace(/\n+/g, ' ').trim();
-  return text.length > 50 ? text.substring(0, 50) + '...' : text;
+  return text.replace(/\n+/g, ' ').trim();
 }
 
 function getTitle(content) {
@@ -18,6 +17,10 @@ function getTitle(content) {
   const lines = (tempDiv.innerText || '').split('\n');
   const title = lines[0]?.trim();
   return title && title.length > 0 ? title.substring(0, 40) : 'Untitled';
+}
+
+function truncate(text, max) {
+  return text.length > max ? text.substring(0, max) + '...' : text;
 }
 
 export default function Sidebar({ notes, activeNoteId, onSelectNote, isOpen }) {
@@ -31,15 +34,17 @@ export default function Sidebar({ notes, activeNoteId, onSelectNote, isOpen }) {
       liveIds.add(note.id);
       const cached = cache.get(note.id);
       if (cached && cached.content === note.content) {
-        return { note, title: cached.title, preview: cached.preview };
+        return { note, title: cached.title, preview: cached.preview, searchText: cached.searchText };
       }
+      const fullText = getPlainText(note.content);
       const meta = {
         content: note.content,
         title: getTitle(note.content),
-        preview: getPreviewText(note.content)
+        preview: truncate(fullText, 50),
+        searchText: fullText.toLowerCase()
       };
       cache.set(note.id, meta);
-      return { note, title: meta.title, preview: meta.preview };
+      return { note, title: meta.title, preview: meta.preview, searchText: meta.searchText };
     });
 
     cache.forEach((value, id) => {
@@ -52,9 +57,7 @@ export default function Sidebar({ notes, activeNoteId, onSelectNote, isOpen }) {
   const filteredNotes = useMemo(() => {
     if (!search.trim()) return items;
     const q = search.toLowerCase();
-    return items.filter((item) => {
-      return item.title.toLowerCase().includes(q) || item.preview.toLowerCase().includes(q);
-    });
+    return items.filter((item) => item.searchText.includes(q));
   }, [items, search]);
 
   if (!isOpen) return null;
