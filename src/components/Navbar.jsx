@@ -1,7 +1,7 @@
 import React from 'react';
-import { SquarePen, Trash2, LogIn, LogOut, PanelLeft, Sun, Moon, Copy, Check, FileText, Code, Type } from 'lucide-react';
+import { SquarePen, Trash2, LogIn, LogOut, PanelLeft, Sun, Moon, Copy, Check, FileText, Code, Type, Pin } from 'lucide-react';
 
-export default function Navbar({ user, onLogin, onLogout, onNewNote, onDeleteNote, activeNoteId, toggleSidebar, darkMode, setDarkMode, onCopyText, onCopyHtml, onCopyMarkdown }) {
+export default function Navbar({ user, onLogin, onLogout, onNewNote, onDeleteNote, activeNoteId, toggleSidebar, darkMode, setDarkMode, onCopyText, onCopyHtml, onCopyMarkdown, onTogglePin, pinned }) {
   const [copiedType, setCopiedType] = React.useState(null);
 
   const handleCopy = (type, handler) => {
@@ -52,6 +52,17 @@ export default function Navbar({ user, onLogin, onLogout, onNewNote, onDeleteNot
                   title="Copy as Markdown"
                 >
                   {copiedType === 'md' ? <Check size={18} /> : <Code size={18} />}
+                </button>
+                <button 
+                  onClick={onTogglePin} 
+                  className={`p-2 rounded-xl transition-all duration-150 hover:scale-105 active:scale-95 ${
+                    pinned 
+                      ? 'text-amber-500 hover:text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-900/20' 
+                      : 'text-slate-400 dark:text-slate-500 hover:text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/20'
+                  }`}
+                  title={pinned ? 'Unpin note' : 'Pin note'}
+                >
+                  <Pin size={18} fill={pinned ? 'currentColor' : 'none'} />
                 </button>
                 <button 
                   onClick={onDeleteNote} 

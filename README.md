@@ -16,7 +16,10 @@ An independent, cloud-synced, web-based Apple Notes clone built as a Progressive
 - **Dark Mode:** Auto-detects system preference (Windows, iOS, Android, Linux) with manual toggle override.
 - **XSS Protection:** HTML sanitization using `sanitize-html` with allowlist approach.
 - **Copy Modes:** Copy notes as Plain Text, HTML (with formatting), or Markdown.
-- **Full-text Search:** Sidebar search matches the entire note text (case-insensitive substring), not just the visible preview.
+- **Full-text Search:** Sidebar search matches the entire note text (case-insensitive substring), with the match highlighted in the list.
+- **Export Backup:** Download all notes as a single `.md` file from the sidebar.
+- **Undo Delete:** Deleted a note by mistake? An Undo snackbar restores it (5 seconds).
+- **Pin Notes:** Pin important notes to keep them at the top of the list.
 
 ---
 
@@ -106,6 +109,7 @@ note/
 ├── src/                      # React app source
 │   ├── components/           # Navbar, Sidebar, Editor
 │   ├── editor/               # notepadEditing.js (Tab/Shift+Tab keys, plain-text paste)
+│   ├── utils/                # text.js (html → plain text helpers)
 │   └── firebase.js           # Firebase config
 ├── text-sanitizer.mjs        # HTML sanitization library
 ├── vite.config.js

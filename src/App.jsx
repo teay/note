@@ -8,11 +8,13 @@ import {
   doc, 
   updateDoc, 
   deleteDoc, 
+  setDoc,
   serverTimestamp 
 } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
 import { db, auth, googleProvider, signInWithPopup, signOut } from './firebase';
 import { sanitizeForStorage } from '../text-sanitizer.mjs';
+import { htmlToPlainText } from './utils/text';
 import Sidebar from './components/Sidebar';
 import Editor from './components/Editor';
 import Navbar from './components/Navbar';
@@ -33,6 +35,8 @@ export default function App() {
   });
   const [loginError, setLoginError] = useState(null);
   const [saveStatus, setSaveStatus] = useState('saved');
+  const [deletedNote, setDeletedNote] = useState(null);
+  const undoTimerRef = useRef(null);
 
   const activeNoteIdRef = useRef(activeNoteId);
   useEffect(() => {
@@ -153,6 +157,7 @@ export default function App() {
       }));
 
       notesData.sort((a, b) => {
+        if (!!b.pinned !== !!a.pinned) return b.pinned ? 1 : -1;
         const timeA = a.updatedAt?.toMillis() || 0;
         const timeB = b.updatedAt?.toMillis() || 0;
         return timeB - timeA;
@@ -209,29 +214,62 @@ export default function App() {
   useEffect(() => () => flushPendingUpdate(), [activeNoteId]);
 
   const handleDeleteNote = async (noteId) => {
+    const note = notes.find((n) => n.id === noteId);
+    if (!note) return;
+    // Drop any pending edit for this note so it cannot revive the write after delete.
+    if (pendingUpdateRef.current?.noteId === noteId) {
+      pendingUpdateRef.current = null;
+      firstPendingAtRef.current = 0;
+      if (updateTimerRef.current) {
+        clearTimeout(updateTimerRef.current);
+        updateTimerRef.current = null;
+      }
+    }
     try {
       await deleteDoc(doc(db, 'notes', noteId));
-      if (activeNoteId === noteId) {
-        setActiveNoteId(null);
-      }
+      if (activeNoteIdRef.current === noteId) setActiveNoteId(null);
+      setDeletedNote(note);
+      if (undoTimerRef.current) clearTimeout(undoTimerRef.current);
+      undoTimerRef.current = setTimeout(() => setDeletedNote(null), 5000);
     } catch (error) {
       console.error("Error deleting note: ", error);
+    }
+  };
+
+  const handleUndoDelete = async () => {
+    const note = deletedNote;
+    if (!note) return;
+    if (undoTimerRef.current) clearTimeout(undoTimerRef.current);
+    setDeletedNote(null);
+    try {
+      await setDoc(doc(db, 'notes', note.id), {
+        userId: note.userId,
+        content: note.content,
+        title: note.title || 'Untitled Note',
+        pinned: !!note.pinned,
+        createdAt: note.createdAt || serverTimestamp(),
+        updatedAt: note.updatedAt || serverTimestamp()
+      });
+      setActiveNoteId(note.id);
+    } catch (error) {
+      console.error("Error restoring note: ", error);
+    }
+  };
+
+  const handleTogglePin = async (noteId) => {
+    const note = notes.find((n) => n.id === noteId);
+    if (!note) return;
+    try {
+      await updateDoc(doc(db, 'notes', noteId), { pinned: !note.pinned });
+    } catch (error) {
+      console.error("Error toggling pin: ", error);
     }
   };
 
   const handleCopyNoteText = () => {
     const note = notes.find(n => n.id === activeNoteId);
     if (note) {
-      const tmp = document.createElement('div');
-      tmp.innerHTML = note.content || '';
-      tmp.querySelectorAll('p, li, h1, h2, h3, h4, h5, h6, br, tr').forEach(el => {
-        if (el.tagName === 'BR') {
-          el.insertAdjacentText('afterend', '\n');
-        } else {
-          el.insertAdjacentText('beforeend', '\n');
-        }
-      });
-      navigator.clipboard.writeText(tmp.textContent || '');
+      navigator.clipboard.writeText(htmlToPlainText(note.content));
     }
   };
 
@@ -340,6 +378,8 @@ export default function App() {
         onCopyText={handleCopyNoteText}
         onCopyHtml={handleCopyNoteHtml}
         onCopyMarkdown={handleCopyNoteMarkdown}
+        onTogglePin={() => handleTogglePin(activeNoteId)}
+        pinned={!!activeNote?.pinned}
       />
       <div className="flex flex-1 overflow-hidden">
         <Sidebar 
@@ -374,6 +414,17 @@ export default function App() {
           )}
         </main>
       </div>
+      {deletedNote && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-4 bg-slate-800/95 dark:bg-slate-700/95 text-white px-4 py-2.5 rounded-full shadow-lg text-sm animate-fade-in">
+          <span className="text-slate-200">Note deleted</span>
+          <button
+            onClick={handleUndoDelete}
+            className="font-semibold text-iosYellow hover:text-amber-300 transition-colors"
+          >
+            Undo
+          </button>
+        </div>
+      )}
     </div>
   );
 }

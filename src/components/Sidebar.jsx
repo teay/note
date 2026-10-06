@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
-import { Search } from 'lucide-react';
+import { Search, Download, Pin } from 'lucide-react';
+import { htmlToPlainText } from '../utils/text';
 
 function getPlainText(content) {
   if (!content) return '';
@@ -23,6 +24,36 @@ function truncate(text, max) {
   return text.length > max ? text.substring(0, max) + '...' : text;
 }
 
+function getPreview(text, query) {
+  if (!text) return '';
+  if (!query) return truncate(text, 50);
+  const idx = text.toLowerCase().indexOf(query);
+  if (idx === -1) return truncate(text, 50);
+  const start = Math.max(0, idx - 20);
+  const end = Math.min(text.length, start + 60);
+  return (start > 0 ? '…' : '') + text.slice(start, end) + (end < text.length ? '…' : '');
+}
+
+function Highlight({ text, query }) {
+  if (!query) return <>{text}</>;
+  const parts = [];
+  const lower = text.toLowerCase();
+  let i = 0;
+  let idx = lower.indexOf(query);
+  while (idx !== -1) {
+    if (idx > i) parts.push(text.slice(i, idx));
+    parts.push(
+      <mark key={idx} className="bg-amber-300 text-slate-900 rounded-sm">
+        {text.slice(idx, idx + query.length)}
+      </mark>
+    );
+    i = idx + query.length;
+    idx = lower.indexOf(query, i);
+  }
+  parts.push(text.slice(i));
+  return <>{parts}</>;
+}
+
 export default function Sidebar({ notes, activeNoteId, onSelectNote, isOpen }) {
   const [search, setSearch] = useState('');
   const metaCacheRef = React.useRef(new Map());
@@ -34,17 +65,15 @@ export default function Sidebar({ notes, activeNoteId, onSelectNote, isOpen }) {
       liveIds.add(note.id);
       const cached = cache.get(note.id);
       if (cached && cached.content === note.content) {
-        return { note, title: cached.title, preview: cached.preview, searchText: cached.searchText };
+        return { note, title: cached.title, text: cached.text };
       }
-      const fullText = getPlainText(note.content);
       const meta = {
         content: note.content,
         title: getTitle(note.content),
-        preview: truncate(fullText, 50),
-        searchText: fullText.toLowerCase()
+        text: getPlainText(note.content)
       };
       cache.set(note.id, meta);
-      return { note, title: meta.title, preview: meta.preview, searchText: meta.searchText };
+      return { note, title: meta.title, text: meta.text };
     });
 
     cache.forEach((value, id) => {
@@ -54,11 +83,34 @@ export default function Sidebar({ notes, activeNoteId, onSelectNote, isOpen }) {
     return result;
   }, [notes]);
 
+  const query = search.trim().toLowerCase();
+
   const filteredNotes = useMemo(() => {
-    if (!search.trim()) return items;
-    const q = search.toLowerCase();
-    return items.filter((item) => item.searchText.includes(q));
-  }, [items, search]);
+    if (!query) return items;
+    return items.filter((item) => item.text.toLowerCase().includes(query));
+  }, [items, query]);
+
+  const handleExport = () => {
+    const date = new Date().toISOString().slice(0, 10);
+    const sections = notes.map((note) => {
+      const full = htmlToPlainText(note.content);
+      const lines = full.split('\n');
+      const title = (lines[0] || '').trim() || 'Untitled';
+      const body = lines.slice(1).join('\n').trim();
+      const updated = note.updatedAt?.toDate ? note.updatedAt.toDate().toISOString().slice(0, 10) : '';
+      return `## ${title}${updated ? ` (${updated})` : ''}\n\n${body}`;
+    });
+    const content = `# Notes export ${date}\n\n${sections.join('\n\n---\n\n')}\n`;
+    const blob = new Blob([content], { type: 'text/markdown;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `notes-${date}.md`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  };
 
   if (!isOpen) return null;
 
@@ -67,9 +119,18 @@ export default function Sidebar({ notes, activeNoteId, onSelectNote, isOpen }) {
       <div className="p-4 border-b border-slate-100 dark:border-slate-700/50">
         <div className="flex items-center justify-between mb-3">
           <h1 className="text-lg font-bold px-1 text-slate-800 dark:text-slate-100 tracking-tight">my note</h1>
-          <span className="text-xs text-slate-400 dark:text-slate-500 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-full">
-            {filteredNotes.length}
-          </span>
+          <div className="flex items-center gap-1.5">
+            <button
+              onClick={handleExport}
+              title="Export all notes (.md)"
+              className="p-1.5 text-slate-400 dark:text-slate-500 hover:text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-lg transition-all duration-150"
+            >
+              <Download size={14} />
+            </button>
+            <span className="text-xs text-slate-400 dark:text-slate-500 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-full">
+              {filteredNotes.length}
+            </span>
+          </div>
         </div>
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 dark:text-slate-500" />
@@ -101,8 +162,8 @@ export default function Sidebar({ notes, activeNoteId, onSelectNote, isOpen }) {
             <p className="text-sm">{search ? 'No matching notes' : 'No notes yet'}</p>
           </div>
         ) : (
-          filteredNotes.map(({ note, title, preview }) => {
-            const body = preview || 'Start writing...';
+          filteredNotes.map(({ note, title, text }) => {
+            const preview = getPreview(text, query) || 'Start writing...';
             const date = note.updatedAt?.toDate ? note.updatedAt.toDate() : null;
 
             return (
@@ -115,10 +176,15 @@ export default function Sidebar({ notes, activeNoteId, onSelectNote, isOpen }) {
                     : 'hover:bg-slate-100/80 dark:hover:bg-slate-800/80 text-slate-700 dark:text-slate-300'
                 }`}
               >
-                <div className="font-semibold text-sm truncate leading-tight">{title}</div>
+                <div className="font-semibold text-sm leading-tight flex items-center gap-1">
+                  {note.pinned && (
+                    <Pin size={11} className="flex-shrink-0 text-amber-500" fill="currentColor" />
+                  )}
+                  <span className="truncate"><Highlight text={title} query={query} /></span>
+                </div>
                 <div className="flex items-center justify-between mt-1">
                   <div className={`text-xs truncate flex-1 ${activeNoteId === note.id ? 'text-white/80' : 'text-slate-400 dark:text-slate-500'}`}>
-                    {body}
+                    <Highlight text={preview} query={query} />
                   </div>
                   {date && (
                     <span className={`text-[10px] ml-2 flex-shrink-0 ${activeNoteId === note.id ? 'text-white/60' : 'text-slate-400 dark:text-slate-500'}`}>

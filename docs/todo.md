@@ -14,6 +14,15 @@ Before adding **any** feature, it must pass all three questions (fails one = not
 - [x] **Search matched only the truncated preview (50 chars) / title (40 chars)** —
       now searches the full note text via a cached `searchText`
       (`src/components/Sidebar.jsx`).
+- [x] **Export all notes** — sidebar download button → single `.md` file
+      (`notes-YYYY-MM-DD.md`), shared `htmlToPlainText` in `src/utils/text.js`.
+- [x] **Undo delete** — delete now shows a 5s "Note deleted / Undo" snackbar;
+      undo restores the doc with the same id (`setDoc`), pending edits for the
+      deleted note are dropped first.
+- [x] **Pin notes** — `pinned` field toggled from the navbar Pin button; pinned
+      notes sort first everywhere; pin icon shown in the sidebar.
+- [x] **Highlight search match** — `<mark>` on matches in title/preview, and the
+      preview window shifts to show the match (not just the first 50 chars).
 
 ## Under consideration
 
@@ -50,14 +59,14 @@ decided:
 
 Suggested order — pick one to do first:
 
-- [ ] **1. Export all notes** — download every note as `.md`/`.json`.
+- [x] **1. Export all notes** — download every note as `.md`/`.json`.
       Pain: data locked in one Firebase account; if lost, everything is gone.
       Zero maintenance (pure client-side).
-- [ ] **2. Undo delete** — currently `deleteDoc` fires immediately; a wrong tap
+- [x] **2. Undo delete** — currently `deleteDoc` fires immediately; a wrong tap
       = gone forever. Simple: soft-delete + "Undo" snackbar (or short trash).
-- [ ] **3. Pin notes** — keep frequently used notes (checklists) at the top.
+- [x] **3. Pin notes** — keep frequently used notes (checklists) at the top.
       Tiny: one field + button + sort.
-- [ ] **4. Highlight search match in preview** — search now covers full text
+- [x] **4. Highlight search match in preview** — search now covers full text
       (`Done` above) but the list doesn't show *where* the match is.
 - [ ] **5. Character/word count** — tiny info line in the editor.
 
