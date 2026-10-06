@@ -19,6 +19,8 @@ Before adding **any** feature, it must pass all three questions (fails one = not
 
 ### Hardened self-hosting (replacing public GH Pages + Firebase)
 
+Full write-up: [`self-hosting.md`](self-hosting.md)
+
 Public web = hard to secure (bots, exposed auth, cloud data). Idea only, not
 decided:
 
