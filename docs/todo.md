@@ -46,6 +46,23 @@ decided:
 - [ ] 6. Backup script: copy notes.db ออกเป็นระยะ
 - [ ] 7. ตัดสินใจ UX มือถือ: อยู่กับ SSH tunnel หรือเปลี่ยนเป็น Tailscale
 
+### Feature ideas (small, all pass the rules above)
+
+Suggested order — pick one to do first:
+
+- [ ] **1. Export all notes** — download every note as `.md`/`.json`.
+      Pain: data locked in one Firebase account; if lost, everything is gone.
+      Zero maintenance (pure client-side).
+- [ ] **2. Undo delete** — currently `deleteDoc` fires immediately; a wrong tap
+      = gone forever. Simple: soft-delete + "Undo" snackbar (or short trash).
+- [ ] **3. Pin notes** — keep frequently used notes (checklists) at the top.
+      Tiny: one field + button + sort.
+- [ ] **4. Highlight search match in preview** — search now covers full text
+      (`Done` above) but the list doesn't show *where* the match is.
+- [ ] **5. Character/word count** — tiny info line in the editor.
+
+Not now (fails rule 2 or 3): tags/folders, version history, note locking.
+
 ### Search memory ceiling
 
 Full-text search runs client-side over all notes held in memory (no pagination),
