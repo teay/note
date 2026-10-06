@@ -19,7 +19,7 @@ An independent, cloud-synced, web-based Apple Notes clone built as a Progressive
 - **Full-text Search:** Sidebar search matches the entire note text (case-insensitive substring), with the match highlighted in the list.
 - **Export Backup:** Download all notes as a single `.md` file from the sidebar.
 - **Undo Delete:** Deleted a note by mistake? An Undo snackbar restores it with the same id (5 seconds); any not-yet-saved edit is discarded so the note cannot resurrect.
-- **Pin Notes:** Pin important notes — they group under a "Pinned" header with a high-contrast pin badge.
+- **Pin Notes:** Pin important notes — a floating pin shows at the top-right of each pinned row (like Apple Notes), grouped under a "Pinned" header.
 
 ---
 

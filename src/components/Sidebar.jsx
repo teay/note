@@ -127,26 +127,24 @@ export default function Sidebar({ notes, activeNoteId, onSelectNote, isOpen }) {
       <button
         key={note.id}
         onClick={() => onSelectNote(note.id)}
-        className={`w-full text-left p-3 rounded-xl transition-all duration-150 ${
+        className={`relative w-full text-left p-3 rounded-xl transition-all duration-150 ${
           isActive
             ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-md shadow-amber-300/30'
             : 'hover:bg-slate-100/80 dark:hover:bg-slate-800/80 text-slate-700 dark:text-slate-300'
         }`}
       >
-        <div className="font-semibold text-sm leading-tight flex items-center gap-1.5">
-          {note.pinned && (
-            <span
-              className={`flex-shrink-0 w-4 h-4 rounded-full flex items-center justify-center ${
-                isActive
-                  ? 'bg-slate-900/80 text-amber-300'
-                  : 'bg-slate-800 text-amber-300 dark:bg-amber-400 dark:text-slate-900'
-              }`}
-              title="Pinned"
-            >
-              <Pin size={9} fill="currentColor" />
-            </span>
-          )}
-          <span className="truncate"><Highlight text={title} query={query} /></span>
+        {note.pinned && (
+          <span
+            className={`absolute top-2.5 right-2.5 leading-none ${
+              isActive ? 'text-slate-900/70' : 'text-slate-500 dark:text-amber-400'
+            }`}
+            title="Pinned"
+          >
+            <Pin size={13} fill="currentColor" />
+          </span>
+        )}
+        <div className={`font-bold text-sm leading-tight truncate ${note.pinned ? 'pr-6' : ''}`}>
+          <Highlight text={title} query={query} />
         </div>
         <div className="flex items-center justify-between mt-1">
           <div className={`text-xs truncate flex-1 ${isActive ? 'text-white/80' : 'text-slate-400 dark:text-slate-500'}`}>
