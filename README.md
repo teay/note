@@ -6,7 +6,9 @@ An independent, cloud-synced, web-based Apple Notes clone built as a Progressive
 
 ## Features
 
-- **Real-time Cloud Sync:** Auto-saves notes instantly to Google Cloud Firestore.
+- **Real-time Cloud Sync:** Auto-saves notes to Google Cloud Firestore (1s debounce, forced save at least every 5s while typing).
+- **Notepad-style Editing:** Tab / Shift+Tab indent and outdent anywhere (lists included), plain-text paste, and whitespace preserved as typed.
+- **Save Status Indicator:** `Edited` → `Saving…` → `Saved` shown at the right of the toolbar, so you always know the app has your changes.
 - **Independent from iCloud:** Works seamlessly on iOS, Android, macOS, Windows, and Linux via Google Authentication.
 - **Rich Text Editing:** Built with Tiptap editor supporting Bold, Italic, Headings (H1/H2), Bullet Lists, and Blockquotes.
 - **PWA Ready:** Supports "Add to Home Screen" on iOS Safari with native standalone app layout.
@@ -73,12 +75,39 @@ Notes are stored in the `notes` collection with the following schema:
 
 ---
 
+## Development
+
+```bash
+npm install       # install dependencies
+npm run dev       # dev server → http://localhost:5173/note/
+npm run build     # production build → dist/
+npm run preview   # serve the production build locally
+```
+
+---
+
+## Deployment (GitHub Pages)
+
+`vite.config.js` sets `base: '/note/'` for the project page at **https://teay.github.io/note/**. Pushing to `main` does **not** publish by itself — build and push the `gh-pages` branch with:
+
+```bash
+npm run deploy    # runs `npm run build`, then publishes dist/ to gh-pages
+```
+
+Pages builds the branch automatically (~30s). Note that `main` and the live site can differ until you run this.
+
+---
+
 ## Project Structure
 
 ```
 note/
-├── src/                    # React app source
-├── text-sanitizer.mjs      # HTML sanitization library
+├── src/                      # React app source
+│   ├── components/           # Navbar, Sidebar, Editor
+│   ├── editor/               # notepadEditing.js (Tab/Shift+Tab keys, plain-text paste)
+│   └── firebase.js           # Firebase config
+├── text-sanitizer.mjs        # HTML sanitization library
+├── vite.config.js
 ├── .gitignore
 └── package.json
 ```
