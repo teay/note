@@ -9,6 +9,12 @@ Before adding **any** feature, it must pass all three questions (fails one = not
 2. If removed, does the app still work completely?
 3. How much maintenance does it add? (little code but breaks often = expensive)
 
+## Done
+
+- [x] **Search matched only the truncated preview (50 chars) / title (40 chars)** —
+      now searches the full note text via a cached `searchText`
+      (`src/components/Sidebar.jsx`).
+
 ## Under consideration
 
 ### Sanitize pasted HTML (`transformPastedHTML`)

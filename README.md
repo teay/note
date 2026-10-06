@@ -16,6 +16,7 @@ An independent, cloud-synced, web-based Apple Notes clone built as a Progressive
 - **Dark Mode:** Auto-detects system preference (Windows, iOS, Android, Linux) with manual toggle override.
 - **XSS Protection:** HTML sanitization using `sanitize-html` with allowlist approach.
 - **Copy Modes:** Copy notes as Plain Text, HTML (with formatting), or Markdown.
+- **Full-text Search:** Sidebar search matches the entire note text (case-insensitive substring), not just the visible preview.
 
 ---
 
