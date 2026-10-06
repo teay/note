@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   collection, 
   addDoc, 
@@ -17,6 +17,9 @@ import Sidebar from './components/Sidebar';
 import Editor from './components/Editor';
 import Navbar from './components/Navbar';
 
+const DEBOUNCE_MS = 400;
+const MAX_WAIT_MS = 5000;
+
 export default function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -29,6 +32,48 @@ export default function App() {
     return window.matchMedia('(prefers-color-scheme: dark)').matches;
   });
   const [loginError, setLoginError] = useState(null);
+
+  const activeNoteIdRef = useRef(activeNoteId);
+  useEffect(() => {
+    activeNoteIdRef.current = activeNoteId;
+  }, [activeNoteId]);
+
+  const pendingUpdateRef = useRef(null);
+  const updateTimerRef = useRef(null);
+  const firstPendingAtRef = useRef(0);
+
+  const flushPendingUpdate = () => {
+    if (updateTimerRef.current) {
+      clearTimeout(updateTimerRef.current);
+      updateTimerRef.current = null;
+    }
+    firstPendingAtRef.current = 0;
+    const pending = pendingUpdateRef.current;
+    if (!pending) return;
+    pendingUpdateRef.current = null;
+
+    const { noteId, content, title } = pending;
+    updateDoc(doc(db, 'notes', noteId), {
+      content: sanitizeForStorage(content),
+      title: title || 'Untitled Note',
+      updatedAt: serverTimestamp()
+    }).catch((error) => {
+      console.error("Error updating note: ", error);
+    });
+  };
+
+  useEffect(() => {
+    const flushOnHide = () => flushPendingUpdate();
+    const onVisibilityChange = () => {
+      if (document.visibilityState === 'hidden') flushPendingUpdate();
+    };
+    window.addEventListener('pagehide', flushOnHide);
+    document.addEventListener('visibilitychange', onVisibilityChange);
+    return () => {
+      window.removeEventListener('pagehide', flushOnHide);
+      document.removeEventListener('visibilitychange', onVisibilityChange);
+    };
+  }, []);
 
   useEffect(() => {
     if (darkMode) {
@@ -95,9 +140,11 @@ export default function App() {
     );
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
-      const notesData = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data()
+      const notesData = snapshot.docs.map((docSnap) => ({
+        id: docSnap.id,
+        // 'estimate' keeps updatedAt populated while the serverTimestamp write is
+        // still pending, otherwise it reads as null and the note jumps to the bottom.
+        ...docSnap.data({ serverTimestamps: 'estimate' })
       }));
 
       notesData.sort((a, b) => {
@@ -108,13 +155,13 @@ export default function App() {
 
       setNotes(notesData);
       
-      if (notesData.length > 0 && !activeNoteId) {
+      if (notesData.length > 0 && !activeNoteIdRef.current) {
         setActiveNoteId(notesData[0].id);
       }
     });
 
     return () => unsubscribe();
-  }, [user, activeNoteId]);
+  }, [user]);
 
   const handleCreateNote = async () => {
     if (!user) return;
@@ -132,20 +179,28 @@ export default function App() {
     }
   };
 
-  const handleUpdateNote = async (updatedContent, title) => {
+  const handleUpdateNote = (updatedContent, title) => {
     if (!activeNoteId) return;
-    try {
-      const safeContent = sanitizeForStorage(updatedContent);
-      const noteRef = doc(db, 'notes', activeNoteId);
-      await updateDoc(noteRef, {
-        content: safeContent,
-        title: title || 'Untitled Note',
-        updatedAt: serverTimestamp()
-      });
-    } catch (error) {
-      console.error("Error updating note: ", error);
+    if (pendingUpdateRef.current && pendingUpdateRef.current.noteId !== activeNoteId) {
+      flushPendingUpdate();
     }
+    const now = Date.now();
+    if (!pendingUpdateRef.current) firstPendingAtRef.current = now;
+    pendingUpdateRef.current = { noteId: activeNoteId, content: updatedContent, title };
+
+    // Debounced: one write per pause instead of one per keystroke, so the
+    // sidebar is not rebuilt on every character. MAX_WAIT_MS forces a write
+    // even while the user types continuously (a plain debounce never fires).
+    const elapsed = now - firstPendingAtRef.current;
+    const delay = Math.min(DEBOUNCE_MS, Math.max(MAX_WAIT_MS - elapsed, 0));
+    if (updateTimerRef.current) clearTimeout(updateTimerRef.current);
+    updateTimerRef.current = setTimeout(() => {
+      updateTimerRef.current = null;
+      flushPendingUpdate();
+    }, delay);
   };
+
+  useEffect(() => () => flushPendingUpdate(), [activeNoteId]);
 
   const handleDeleteNote = async (noteId) => {
     try {

@@ -22,16 +22,40 @@ function getTitle(content) {
 
 export default function Sidebar({ notes, activeNoteId, onSelectNote, isOpen }) {
   const [search, setSearch] = useState('');
+  const metaCacheRef = React.useRef(new Map());
+
+  const items = useMemo(() => {
+    const cache = metaCacheRef.current;
+    const liveIds = new Set();
+    const result = notes.map((note) => {
+      liveIds.add(note.id);
+      const cached = cache.get(note.id);
+      if (cached && cached.content === note.content) {
+        return { note, title: cached.title, preview: cached.preview };
+      }
+      const meta = {
+        content: note.content,
+        title: getTitle(note.content),
+        preview: getPreviewText(note.content)
+      };
+      cache.set(note.id, meta);
+      return { note, title: meta.title, preview: meta.preview };
+    });
+
+    cache.forEach((value, id) => {
+      if (!liveIds.has(id)) cache.delete(id);
+    });
+
+    return result;
+  }, [notes]);
 
   const filteredNotes = useMemo(() => {
-    if (!search.trim()) return notes;
+    if (!search.trim()) return items;
     const q = search.toLowerCase();
-    return notes.filter((note) => {
-      const title = getTitle(note.content).toLowerCase();
-      const body = getPreviewText(note.content).toLowerCase();
-      return title.includes(q) || body.includes(q);
+    return items.filter((item) => {
+      return item.title.toLowerCase().includes(q) || item.preview.toLowerCase().includes(q);
     });
-  }, [notes, search]);
+  }, [items, search]);
 
   if (!isOpen) return null;
 
@@ -74,9 +98,8 @@ export default function Sidebar({ notes, activeNoteId, onSelectNote, isOpen }) {
             <p className="text-sm">{search ? 'No matching notes' : 'No notes yet'}</p>
           </div>
         ) : (
-          filteredNotes.map((note) => {
-            const title = getTitle(note.content);
-            const body = getPreviewText(note.content) || 'Start writing...';
+          filteredNotes.map(({ note, title, preview }) => {
+            const body = preview || 'Start writing...';
             const date = note.updatedAt?.toDate ? note.updatedAt.toDate() : null;
 
             return (
