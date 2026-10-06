@@ -59,11 +59,43 @@ decided:
 
 ### Feature ideas (small, all pass the rules above)
 
-Items 1–4 are done — see **Done** above. Remaining:
+Items 1–4 are done — see **Done** above. Remaining, suggested order:
 
-- [ ] **5. Character/word count** — tiny info line in the editor.
+**Recommended first:**
+- [ ] **5. Task list (checkbox)** — Tiptap already ships `TaskItem`; add a ✅
+      toolbar button so notes double as checklists. Highest value in this list.
 
-Not now (fails rule 2 or 3): tags/folders, version history, note locking.
+**Tiny (minutes):**
+- [ ] **6. Sort options** — sidebar dropdown: updated desc (default), A→Z,
+      created desc.
+- [ ] **7. Duplicate note** — one button → copy of the current note (templates).
+- [ ] **8. Insert date/time** — toolbar button to stamp the current date.
+- [ ] **9. Character/word count** — tiny info line in the editor.
+
+**Small (an hour or so):**
+- [ ] **10. Find in note** — Cmd+F inside the open note, jump between matches
+      (sidebar search doesn't highlight in the editor).
+- [ ] **11. Quick switcher** — Cmd+K → type → open note (useful once the list
+      gets long).
+- [ ] **12. Remember scroll position per note** — currently resets on reopen.
+
+**Medium:**
+- [ ] **13. Wiki links `[[note]]`** — link notes to each other.
+
+Not now (fails rule 2 or 3): tags/folders, version history, note locking,
+trash page, multi-select, templates gallery, home-screen widget.
+
+### AI assistant ideas (idea only, not decided)
+
+- **Level 1 (start here):** "Ask AI" button in the editor — summarize the open
+  note, rewrite/translate, turn text into a checklist. One API call per press.
+- **Level 2 (the sidebar-bot idea):** a "main" bot reads notes and splits them
+  into tasks in a special task note; sub-tasks get help from the same model
+  with different prompts (no real multi-agent needed).
+- **Level 3 (not yet):** full multi-agent orchestration — fails rules 2–3.
+- Decisions needed first: where to keep the API key (never in the browser —
+  needs a small proxy), whether note content may leave to an external provider
+  (privacy vs. running a local model), ongoing token cost vs. a free app.
 
 ### Search memory ceiling
 
