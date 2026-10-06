@@ -17,6 +17,22 @@ Before adding **any** feature, it must pass all three questions (fails one = not
 
 ## Under consideration
 
+### Hardened self-hosting (replacing public GH Pages + Firebase)
+
+Public web = hard to secure (bots, exposed auth, cloud data). Idea only, not
+decided:
+
+- Run as a **compiled single binary** on a tiny Linux / **distroless** image
+  (no shell, minimal attack surface), data in local SQLite — no cloud.
+- Listen on **127.0.0.1 only**; reach it via **SSH tunnel**
+  (`ssh -L`) — no public HTTP at all.
+- Trade-offs: self-maintained (updates/backup/uptime), **bad UX on iPhone**
+  (needs an SSH app first), no cross-device sync.
+- Likely better balance: **WireGuard/Tailscale** instead of SSH tunnel —
+  same zero-trust reachability, but Safari can open it directly on mobile.
+
+- [ ] Decide if the security gain is worth losing GH Pages/Firebase simplicity
+
 ### Search memory ceiling
 
 Full-text search runs client-side over all notes held in memory (no pagination),
