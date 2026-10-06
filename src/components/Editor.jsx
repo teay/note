@@ -1,11 +1,14 @@
 import React, { useEffect } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
+import { notepadEditingProps } from '../editor/notepadEditing';
 
 export default function Editor({ note, onUpdate }) {
   const editor = useEditor({
     extensions: [StarterKit],
     content: note?.content || '',
+    editorProps: notepadEditingProps(),
+    parseOptions: { preserveWhitespace: true },
     onUpdate: ({ editor }) => {
       const html = editor.getHTML();
       const text = editor.getText();
@@ -20,7 +23,7 @@ export default function Editor({ note, onUpdate }) {
   useEffect(() => {
     if (editor && note) {
       if (editor.getHTML() !== note.content) {
-        editor.commands.setContent(note.content || '');
+        editor.commands.setContent(note.content || '', false, { preserveWhitespace: true });
       }
     }
   }, [note?.id, editor]);

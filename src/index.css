@@ -13,6 +13,9 @@ body {
 
 .ProseMirror {
   outline: none;
+  white-space: pre-wrap;
+  tab-size: 4;
+  -moz-tab-size: 4;
   min-height: 100%;
   font-size: 1.05rem;
   line-height: 1.7;
