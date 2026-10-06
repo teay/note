@@ -17,6 +17,14 @@ Before adding **any** feature, it must pass all three questions (fails one = not
 
 ## Under consideration
 
+### Search memory ceiling
+
+Full-text search runs client-side over all notes held in memory (no pagination),
+plus a cached `searchText` copy — so RAM is the practical limit (~2x total note
+text). Fine for hundreds of KB-level notes; revisit with pagination/lazy load
+only if users hit lag on low-RAM phones (that change would also affect Firestore
+read costs).
+
 ### Sanitize pasted HTML (`transformPastedHTML`)
 
 Paste currently goes straight into the TipTap parser; sanitization only runs on
