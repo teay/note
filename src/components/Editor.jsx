@@ -3,7 +3,14 @@ import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import { notepadEditingProps } from '../editor/notepadEditing';
 
-export default function Editor({ note, onUpdate }) {
+const SAVE_STATUS = {
+  saving: { text: 'Saving…', className: 'text-amber-600 dark:text-amber-400 animate-pulse' },
+  edited: { text: 'Edited', className: 'text-amber-600 dark:text-amber-400' },
+  saved: { text: 'Saved', className: 'text-slate-400 dark:text-slate-500' },
+  error: { text: 'Not saved', className: 'text-red-500' },
+};
+
+export default function Editor({ note, onUpdate, saveStatus }) {
   const editor = useEditor({
     extensions: [StarterKit],
     content: note?.content || '',
@@ -103,6 +110,14 @@ export default function Editor({ note, onUpdate }) {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
           </svg>
         </button>
+        <span
+          aria-live="polite"
+          className={`ml-auto mr-1 text-xs font-medium whitespace-nowrap transition-colors duration-300 ${
+            (SAVE_STATUS[saveStatus] || SAVE_STATUS.saved).className
+          }`}
+        >
+          {(SAVE_STATUS[saveStatus] || SAVE_STATUS.saved).text}
+        </span>
       </div>
 
       <div className="flex-1 overflow-y-auto px-6 py-4">

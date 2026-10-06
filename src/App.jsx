@@ -32,6 +32,7 @@ export default function App() {
     return window.matchMedia('(prefers-color-scheme: dark)').matches;
   });
   const [loginError, setLoginError] = useState(null);
+  const [saveStatus, setSaveStatus] = useState('saved');
 
   const activeNoteIdRef = useRef(activeNoteId);
   useEffect(() => {
@@ -51,14 +52,18 @@ export default function App() {
     const pending = pendingUpdateRef.current;
     if (!pending) return;
     pendingUpdateRef.current = null;
+    setSaveStatus('saving');
 
     const { noteId, content, title } = pending;
     updateDoc(doc(db, 'notes', noteId), {
       content: sanitizeForStorage(content),
       title: title || 'Untitled Note',
       updatedAt: serverTimestamp()
+    }).then(() => {
+      if (!pendingUpdateRef.current) setSaveStatus('saved');
     }).catch((error) => {
       console.error("Error updating note: ", error);
+      setSaveStatus('error');
     });
   };
 
@@ -187,6 +192,7 @@ export default function App() {
     const now = Date.now();
     if (!pendingUpdateRef.current) firstPendingAtRef.current = now;
     pendingUpdateRef.current = { noteId: activeNoteId, content: updatedContent, title };
+    setSaveStatus((prev) => (prev === 'edited' ? prev : 'edited'));
 
     // Debounced: one write per pause instead of one per keystroke, so the
     // sidebar is not rebuilt on every character. MAX_WAIT_MS forces a write
@@ -348,6 +354,7 @@ export default function App() {
               key={activeNote.id} 
               note={activeNote} 
               onUpdate={handleUpdateNote} 
+              saveStatus={saveStatus}
             />
           ) : (
             <div className="h-full flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 animate-fade-in">
