@@ -114,6 +114,67 @@ export default function Sidebar({ notes, activeNoteId, onSelectNote, isOpen }) {
 
   if (!isOpen) return null;
 
+  const pinnedItems = filteredNotes.filter((item) => item.note.pinned);
+  const otherItems = filteredNotes.filter((item) => !item.note.pinned);
+  const sectionHeader = 'px-3 pt-2 pb-0.5 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500';
+
+  const renderRow = ({ note, title, text }) => {
+    const isActive = activeNoteId === note.id;
+    const preview = getPreview(text, query) || 'Start writing...';
+    const date = note.updatedAt?.toDate ? note.updatedAt.toDate() : null;
+
+    return (
+      <button
+        key={note.id}
+        onClick={() => onSelectNote(note.id)}
+        className={`w-full text-left p-3 rounded-xl transition-all duration-150 ${
+          isActive
+            ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-md shadow-amber-300/30'
+            : 'hover:bg-slate-100/80 dark:hover:bg-slate-800/80 text-slate-700 dark:text-slate-300'
+        }`}
+      >
+        <div className="font-semibold text-sm leading-tight flex items-center gap-1.5">
+          {note.pinned && (
+            <span
+              className={`flex-shrink-0 w-4 h-4 rounded-full flex items-center justify-center ${
+                isActive
+                  ? 'bg-slate-900/80 text-amber-300'
+                  : 'bg-slate-800 text-amber-300 dark:bg-amber-400 dark:text-slate-900'
+              }`}
+              title="Pinned"
+            >
+              <Pin size={9} fill="currentColor" />
+            </span>
+          )}
+          <span className="truncate"><Highlight text={title} query={query} /></span>
+        </div>
+        <div className="flex items-center justify-between mt-1">
+          <div className={`text-xs truncate flex-1 ${isActive ? 'text-white/80' : 'text-slate-400 dark:text-slate-500'}`}>
+            <Highlight text={preview} query={query} />
+          </div>
+          {date && (
+            <span className={`text-[10px] ml-2 flex-shrink-0 ${isActive ? 'text-white/60' : 'text-slate-400 dark:text-slate-500'}`}>
+              {date.toLocaleDateString('en', { month: 'short', day: 'numeric' })}
+            </span>
+          )}
+        </div>
+      </button>
+    );
+  };
+
+  const renderList = (
+    <>
+      {pinnedItems.length > 0 && (
+        <div className={sectionHeader}>Pinned</div>
+      )}
+      {pinnedItems.map(renderRow)}
+      {pinnedItems.length > 0 && otherItems.length > 0 && (
+        <div className={sectionHeader}>Others</div>
+      )}
+      {otherItems.map(renderRow)}
+    </>
+  );
+
   return (
     <div className="w-full md:w-80 bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl border-r border-slate-200/80 dark:border-slate-700/80 flex flex-col h-[calc(100vh-3.5rem)]">
       <div className="p-4 border-b border-slate-100 dark:border-slate-700/50">
@@ -162,39 +223,7 @@ export default function Sidebar({ notes, activeNoteId, onSelectNote, isOpen }) {
             <p className="text-sm">{search ? 'No matching notes' : 'No notes yet'}</p>
           </div>
         ) : (
-          filteredNotes.map(({ note, title, text }) => {
-            const preview = getPreview(text, query) || 'Start writing...';
-            const date = note.updatedAt?.toDate ? note.updatedAt.toDate() : null;
-
-            return (
-              <button
-                key={note.id}
-                onClick={() => onSelectNote(note.id)}
-                className={`w-full text-left p-3 rounded-xl transition-all duration-150 ${
-                  activeNoteId === note.id 
-                    ? 'bg-gradient-to-r from-iosYellow to-amber-500 text-white shadow-md shadow-amber-200/40' 
-                    : 'hover:bg-slate-100/80 dark:hover:bg-slate-800/80 text-slate-700 dark:text-slate-300'
-                }`}
-              >
-                <div className="font-semibold text-sm leading-tight flex items-center gap-1">
-                  {note.pinned && (
-                    <Pin size={11} className="flex-shrink-0 text-amber-500" fill="currentColor" />
-                  )}
-                  <span className="truncate"><Highlight text={title} query={query} /></span>
-                </div>
-                <div className="flex items-center justify-between mt-1">
-                  <div className={`text-xs truncate flex-1 ${activeNoteId === note.id ? 'text-white/80' : 'text-slate-400 dark:text-slate-500'}`}>
-                    <Highlight text={preview} query={query} />
-                  </div>
-                  {date && (
-                    <span className={`text-[10px] ml-2 flex-shrink-0 ${activeNoteId === note.id ? 'text-white/60' : 'text-slate-400 dark:text-slate-500'}`}>
-                      {date.toLocaleDateString('en', { month: 'short', day: 'numeric' })}
-                    </span>
-                  )}
-                </div>
-              </button>
-            );
-          })
+          renderList
         )}
       </div>
     </div>

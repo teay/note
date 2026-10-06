@@ -19,7 +19,10 @@ Before adding **any** feature, it must pass all three questions (fails one = not
       undo restores the doc with the same id (`setDoc`), pending edits for the
       deleted note are dropped first.
 - [x] **Pin notes** — `pinned` field toggled from the navbar Pin button; pinned
-      notes sort first everywhere; pin icon shown in the sidebar.
+      notes sort first; sidebar shows a high-contrast circular pin badge (visible
+      on every row background) and groups rows under `Pinned` / `Others` headers;
+      active row gradient toned down from `iosYellow→amber-500` to
+      `amber-500→amber-600` (was too glaring).
 - [x] **Highlight search match** — `<mark>` on matches in title/preview, and the
       preview window shifts to show the match (not just the first 50 chars).
 
