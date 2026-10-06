@@ -12,8 +12,7 @@ Before adding **any** feature, it must pass all three questions (fails one = not
 ## Done
 
 - [x] **Search matched only the truncated preview (50 chars) / title (40 chars)** —
-      now searches the full note text via a cached `searchText`
-      (`src/components/Sidebar.jsx`).
+      now searches the full plain text of each note (`src/components/Sidebar.jsx`).
 - [x] **Export all notes** — sidebar download button → single `.md` file
       (`notes-YYYY-MM-DD.md`), shared `htmlToPlainText` in `src/utils/text.js`.
 - [x] **Undo delete** — delete now shows a 5s "Note deleted / Undo" snackbar;
@@ -57,28 +56,19 @@ decided:
 
 ### Feature ideas (small, all pass the rules above)
 
-Suggested order — pick one to do first:
+Items 1–4 are done — see **Done** above. Remaining:
 
-- [x] **1. Export all notes** — download every note as `.md`/`.json`.
-      Pain: data locked in one Firebase account; if lost, everything is gone.
-      Zero maintenance (pure client-side).
-- [x] **2. Undo delete** — currently `deleteDoc` fires immediately; a wrong tap
-      = gone forever. Simple: soft-delete + "Undo" snackbar (or short trash).
-- [x] **3. Pin notes** — keep frequently used notes (checklists) at the top.
-      Tiny: one field + button + sort.
-- [x] **4. Highlight search match in preview** — search now covers full text
-      (`Done` above) but the list doesn't show *where* the match is.
 - [ ] **5. Character/word count** — tiny info line in the editor.
 
 Not now (fails rule 2 or 3): tags/folders, version history, note locking.
 
 ### Search memory ceiling
 
-Full-text search runs client-side over all notes held in memory (no pagination),
-plus a cached `searchText` copy — so RAM is the practical limit (~2x total note
-text). Fine for hundreds of KB-level notes; revisit with pagination/lazy load
-only if users hit lag on low-RAM phones (that change would also affect Firestore
-read costs).
+Search runs client-side over all notes held in memory (no pagination): each note
+caches its full plain `text` for display/search, so RAM is the practical limit.
+Fine for hundreds of KB-level notes; revisit with pagination/lazy load only if
+users hit lag on low-RAM phones (that change would also affect Firestore read
+costs).
 
 ### Sanitize pasted HTML (`transformPastedHTML`)
 
