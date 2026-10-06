@@ -17,7 +17,7 @@ import Sidebar from './components/Sidebar';
 import Editor from './components/Editor';
 import Navbar from './components/Navbar';
 
-const DEBOUNCE_MS = 400;
+const DEBOUNCE_MS = 1000;
 const MAX_WAIT_MS = 5000;
 
 export default function App() {
