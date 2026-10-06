@@ -33,6 +33,17 @@ decided:
 
 - [ ] Decide if the security gain is worth losing GH Pages/Firebase simplicity
 
+#### Plan (steps, not started)
+
+- [ ] 1. เตรียม VPS เล็กสุด + SSH key-only login (ปิด password, optional fail2ban)
+- [ ] 2. Backend ตัวเล็ก (Go หรือ Node+Express): serve build แอป React เดิม + CRUD โน้ต → SQLite
+       (ขั้นหลัก — ย้ายข้อมูลออกจาก Firebase)
+- [ ] 3. Dockerfile multi-stage → วาง binary + static files ลง distroless image
+- [ ] 4. รันเฉพาะ localhost: `docker run -p 127.0.0.1:8080:8080 ...` (ไม่เปิดพอร์ตสาธารณะ)
+- [ ] 5. ทดสอบผ่าน `ssh -L 8080:localhost:8080 u@server` → เปิด localhost:8080
+- [ ] 6. Backup script: copy notes.db ออกเป็นระยะ
+- [ ] 7. ตัดสินใจ UX มือถือ: อยู่กับ SSH tunnel หรือเปลี่ยนเป็น Tailscale
+
 ### Search memory ceiling
 
 Full-text search runs client-side over all notes held in memory (no pagination),
