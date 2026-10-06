@@ -1,5 +1,14 @@
 # TODO
 
+## Principles: keep it simple
+
+The goal is the simplest app that does the job — no unnecessary features.
+Before adding **any** feature, it must pass all three questions (fails one = not yet):
+
+1. Does it fix a **real pain** we actually hit, or is it just "nice to have"?
+2. If removed, does the app still work completely?
+3. How much maintenance does it add? (little code but breaks often = expensive)
+
 ## Under consideration
 
 ### Sanitize pasted HTML (`transformPastedHTML`)
@@ -25,3 +34,9 @@ save to Firestore, so untrusted HTML from the web executes handlers (e.g.
       `parseStyleAttributes: false` (drops all styles → see paste config note
       above) or rewriting `text-sanitizer.mjs` with `DOMParser` (also shrinks
       the 1.17 MB bundle)
+
+## Candidates to cut (fails the rules above)
+
+- [ ] **Copy Markdown** — regex-based, breaks on nested/multi-line HTML; nobody asked for it
+- [ ] **Copy HTML** — duplicate of Cmd+C inside the editor (ProseMirror already puts HTML on the clipboard)
+- [ ] **`design.md`** — unrelated fintech dashboard spec left over from another project
